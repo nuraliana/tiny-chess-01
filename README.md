@@ -37,6 +37,27 @@ All trials beat the three depth anchors (depth-2/3/4) and are above the
 above the 1,325 sunfish baseline mean; the mean sits below it, so a
 prize is not assured — the engine qualifies for the final.
 
+## Inside the 4 KB
+
+The readable source is `engine_slim.py` (12,844 bytes, 393 lines):
+the packed `main.py` is exactly what the kit's `makefun compress`
+produces from it, verified byte for byte after every change.
+Move generation covers pawns (single, double, capture, en passant,
+promotion to queen, rook, bishop or knight), knights, kings, bishops,
+rooks, queens, and both castling directions, with legality checked by
+making the move and testing whether the mover's king is attacked.
+The search never trusts a pseudo-legal move: every candidate is made
+on the board and unmade again, so an illegal move can never be sent.
+Repetition is scored as a draw once a position key has appeared
+twice, which keeps the engine out of threefold loops in dead
+positions. The node budget is a hard cap: the search raises an
+internal abort once 50,000 nodes are spent, the root catches it,
+and the best move found at the last completed depth is played.
+A passed-pawn bonus (+5 per rank) was tried and reverted on
+14 November after a practice trial fell to Elo 989: the bonus
+helped White and did nothing for Black, so the plain evaluation
+won the trial back to 3-0-5 and Elo 1,253 on the re-run.
+
 ## License
 
 MIT — see `LICENSE`.
