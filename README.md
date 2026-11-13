@@ -9,8 +9,9 @@ for the make.fun bounty "Build the strongest chess engine in 4 KB of Python".
 50,000-node budget per move, PVS at the root, transposition table,
 killer moves, MVV-LVA ordering, quiescence search (captures/promotions,
 all evasions in check), null-move pruning, repetition = draw.
-Evaluation: material + piece-square tables + bishop pair + king table.
-Fully deterministic: fixed node budget, no clock, no randomness, no
+Evaluation: material + piece-square tables + bishop pair + king table +
+passed-pawn bonus (most-advanced pawn per file, blocked by enemy pawns
+ahead on neighbouring files). Fully deterministic: fixed node budget, no clock, no randomness, no
 model calls. Talks to the game env at `MAKEFUN_ENV_URL` via
 `POST /game`, `POST /move` (UCI) and `POST /resign`.
 
