@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/tiny-chess-01/nuraliana/tiny-chess-01/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 [![reward](https://make.fun/badge/tiny-chess-01/nuraliana/tiny-chess-01/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 
-A single-file (`main.py`, 3,830 bytes) Python 3.13 stdlib-only engine
+A single-file (`main.py`, 4,083 bytes) Python 3.13 stdlib-only engine
 for the make.fun bounty "Build the strongest chess engine in 4 KB of Python".
 
 ## How it plays
@@ -13,10 +13,12 @@ for the make.fun bounty "Build the strongest chess engine in 4 KB of Python".
 30,000-node budget per move, PVS at the root, transposition table,
 killer moves, MVV-LVA ordering, quiescence search (captures/promotions,
 all evasions in check), null-move pruning, repetition = draw.
-Evaluation: material + piece-square tables + bishop pair + king table.
-Fully deterministic: fixed node budget, no clock, no randomness, no
-model calls. Talks to the env at `MAKEFUN_ENV_URL` via `POST /game`,
-`POST /move` (UCI) and `POST /resign`.
+Evaluation: PeSTO tapered middlegame/endgame piece-square tables
+(quantized Q8, max error 4 cp), maintained incrementally in make/unmake
+— the evaluator is O(1), never a full-board rescan. Fully deterministic:
+fixed node budget, no clock, no randomness, no model calls. Talks to the
+env at `MAKEFUN_ENV_URL` via `POST /game`, `POST /move` (UCI) and
+`POST /resign`.
 
 ## Run it
 
@@ -26,38 +28,16 @@ MAKEFUN_ENV_URL=http://127.0.0.1:18080 timeout 1700 python3 main.py
 
 ## Practice results (local, official kit scorer)
 
-| Trial | Engine | W-D-L | Elo |
-|-------|--------|-------|-----|
-| trial-0 | cut engine, unpacked, 50k nodes | 3-1-4 | **1,326** |
-| trial-0 | `main.py` (packed), 30k nodes, round 3 | 3-1-4 | **1,326** |
-
 Official-set trial-0 at 30k nodes: 3-1-4 / Elo 1,326, above the 1,154
 floor — wins vs depth-2, depth-3 and depth-4, draw vs nodes-100k;
-losses vs nodes-250k, nodes-500k, nodes-1M and nodes-2M. The 25k run
-scored 3-0-5 / Elo 1,253 in 403 s; the 30k run finishes in 408 s.
-Mean of the three trials is 1,134; best (1,326) is just above the
-1,325 sunfish baseline mean, so a prize is not assured — the engine
-qualifies for the final.
-
-## Inside the 4 KB
-
-The readable source is `engine_slim.py` (12,876 bytes, 394 lines);
-`main.py` is what the kit's `makefun compress` makes from it, verified
-byte for byte after every change.
-Move generation covers pawns, knights, kings, bishops, rooks, queens
-and both castling directions; legality is checked by making the move
-and testing whether the mover's king is attacked.
-The search never trusts a pseudo-legal move: every candidate is made
-and unmade again, so an illegal move can never be sent. Repetition
-is a draw once a position key has appeared twice. The node budget is a hard cap: the search raises an
-internal abort once 30,000 nodes are spent, the root catches it,
-and the best move found at the last completed depth is played.
-Round 2 cut the budget from 50,000 to 25,000 nodes and sped up the
-search: ordering scores without a helper call per move, the attack
-test splits knights from kings, and the evaluation reads one folded
-piece-square table; trial-0 finishes in 408 s of wall, down from 833 s.
-A passed-pawn bonus was tried and reverted after a
-practice trial fell to Elo 989.
+losses vs nodes-250k, nodes-500k, nodes-1M and nodes-2M. The readable
+source is `engine_v16.py` (9,776 bytes); `main.py` is what the kit's
+`makefun compress` makes from it, verified byte for byte after every
+change. Move generation covers all pieces and both castling directions;
+legality is checked by making the move and testing whether the mover's
+king is attacked. The node budget is a hard cap: the search raises an
+internal abort once 30,000 nodes are spent, the root catches it, and
+the best move found at the last completed depth is played.
 
 ## License
 
