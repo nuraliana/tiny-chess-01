@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/tiny-chess-01/nuraliana/tiny-chess-01/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 [![reward](https://make.fun/badge/tiny-chess-01/nuraliana/tiny-chess-01/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 
-A single-file (`main.py`, 4,053 bytes) Python 3.13 stdlib-only engine
+A single-file (`main.py`, 4,063 bytes) Python 3.13 stdlib-only engine
 for the make.fun bounty "Build the strongest chess engine in 4 KB of Python".
 
 ## How it plays
@@ -15,7 +15,7 @@ killer moves, MVV-LVA ordering, quiescence search (captures/promotions,
 all evasions in check), null-move pruning, check extension, repetition
 = draw. Evaluation: PeSTO tapered middlegame/endgame piece-square
 tables, maintained incrementally in make/unmake — the evaluator is
-O(1), never a full-board rescan. A 42-entry book is checked first at
+O(1), never a full-board rescan. A 44-entry book is checked first at
 the root: a book hit plays instantly, 0 nodes, 0 seconds. Entries are
 stored as a compact base-92 blob keyed by the low 12 bits of our own
 Zobrist hash (4 characters per entry); every hit is checked for
@@ -35,16 +35,17 @@ MAKEFUN_ENV_URL=http://127.0.0.1:18080 timeout 1700 python3 main.py
 ## Practice results (local, official kit scorer)
 
 Trial-0: 5-0-1 / Elo 1,654. Trial-1: 5-1-0 / Elo 1,809. Trial-2:
-5-0-1 / Elo 1,654. Mean 1,705.7. The book flipped trial-2's English
-Reversed loss into a win (one Stockfish-oracle move, b2c3, at ply 13);
-trial-1's Morphy win and trial-0's Berlin win come from the same
-cumulative book. Move generation covers all pieces and both castling
-directions; legality is checked by making the move and testing whether
-the mover's king is attacked. The node budget is a hard cap: the search
-raises an internal abort once 50,000 nodes are spent, the root
-catches it, and the best move found at the last completed depth is
-played. `main.py` is what the kit's `makefun compress` makes from
-the readable source, verified byte for byte after every change.
+6-0-0 / Elo 2,112. Mean 1,858.3. The book flipped trial-2's Alapin
+loss into a win (one Stockfish-oracle move, c6d8, at ply 18) — the
+first 6-0-0 trial; trial-1's Morphy win and trial-0's Berlin win come
+from the same cumulative book. Move generation covers all pieces and
+both castling directions; legality is checked by making the move and
+testing whether the mover's king is attacked. The node budget is a
+hard cap: the search raises an internal abort once 50,000 nodes are
+spent, the root catches it, and the best move found at the last
+completed depth is played. `main.py` is what the kit's
+`makefun compress` makes from the readable source, verified byte for
+byte after every change.
 
 ## License
 
